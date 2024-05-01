@@ -137,17 +137,17 @@ output "aws_logstreams_fluentbit" {
 
 output "velero_backup_schedule_team_a" {
   description = "Creates a Velero backup schedule for team-a and deletes the existing backup, if it exists. It can be applied for other controllers using Amazon EBS."
-  value       = "velero schedule delete ${local.velero_bk_demo} --confirm || true; velero create schedule ${local.velero_bk_demo} --schedule='@every 30m' --ttl 2h --include-namespaces ${module.eks_blueprints_addon_cbci.cbci_namespace} --exclude-resources pods,events,events.events.k8s.io --selector tenant=team-a"
+  value       = "velero schedule delete ${local.velero_schedulle_name} --confirm || true; velero create schedule ${local.velero_schedulle_name} --schedule='@every 30m' --ttl 2h --include-namespaces ${module.eks_blueprints_addon_cbci.cbci_namespace} --exclude-resources pods,events,events.events.k8s.io --selector tenant=${local.velero_controller_selector}"
 }
 
 output "velero_backup_on_demand_team_a" {
   description = "Takes an on-demand Velero backup from the schedule for team-a."
-  value       = "velero backup create --from-schedule ${local.velero_bk_demo} --wait"
+  value       = "velero backup create --from-schedule ${local.velero_schedulle_name} --wait"
 }
 
 output "velero_restore_team_a" {
   description = "Restores team-a from a backup. It is also applicable for the rest of the scheduled backups."
-  value       = "kubectl delete all -n ${module.eks_blueprints_addon_cbci.cbci_namespace} -l tenant=team-a; kubectl delete pvc -n ${module.eks_blueprints_addon_cbci.cbci_namespace} -l tenant=team-a; kubectl delete ep -n ${module.eks_blueprints_addon_cbci.cbci_namespace} -l tenant=team-a; velero restore create --from-schedule ${local.velero_bk_demo}"
+  value       = "kubectl delete all -n ${module.eks_blueprints_addon_cbci.cbci_namespace} -l tenant=${local.velero_controller_selector}; kubectl delete pvc -n ${module.eks_blueprints_addon_cbci.cbci_namespace} -l tenant=${local.velero_controller_selector}; kubectl delete ep -n ${module.eks_blueprints_addon_cbci.cbci_namespace} -l tenant=${local.velero_controller_selector}; velero restore create --from-schedule ${local.velero_controller_selector}"
 }
 
 output "prometheus_dashboard" {
